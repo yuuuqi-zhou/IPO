@@ -16,8 +16,19 @@ if PROJECT_ROOT not in sys.path:
 # =========================
 # 1) 你项目的真实路径（按你给的）
 # =========================
-ARTIFACT_DIR = "/Users/yuqizhou/IPO_6/rf_shap_outputs/artifacts"
-POLICY_PATH  = "/Users/yuqizhou/IPO_6/leverage_outputs/policy.joblib"
+from pathlib import Path
+
+def find_repo_root():
+    here = Path(__file__).resolve()
+    for p in [here.parent] + list(here.parents):
+        if (p / "rf_shap_outputs").exists():
+            return p
+    raise FileNotFoundError("找不到 repo 根目录（rf_shap_outputs）")
+
+REPO_DIR = find_repo_root()
+
+ARTIFACT_DIR = REPO_DIR / "rf_shap_outputs" / "artifacts"
+POLICY_PATH  = REPO_DIR / "leverage_outputs" / "policy.joblib"
 
 
 # =========================
