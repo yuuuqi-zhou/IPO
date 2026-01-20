@@ -1,0 +1,16 @@
+Threshold = 0.5
+Confusion Matrix:
+TP (correctly blocked) : 195
+FP (overly conservative): 8
+FN (missed risk)        : 8
+TN (safe approved)      : 359
+
+Key rates:
+Miss rate (FN / actual breaks): 3.94%
+Block rate (TP / predicted high risk): 96.06%
+
+Common metrics:
+Accuracy : 97.19%
+Precision: 96.06%
+Recall   : 96.06%
+F1       : 96.06%
