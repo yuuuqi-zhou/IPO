@@ -293,8 +293,7 @@ def draw_breach_heatmap_minimal(ax, res, pred_ret, pred_vol, title="类似首日
     if np.isfinite(rate_here):
         delta = rate_here - base
         txt = (
-            "在不同首日表现区间内的历史跌破风险分布\n"
-            f"当前预测对应区间的历史跌破率约为 {rate_here*100:.1f}%，"
+            "当前对应区间的历史跌破率约为 {rate_here*100:.1f}%\n"
             f"相较全样本平均水平（{base*100:.1f}%）{delta*100:+.1f}pct"
         )
     else:
