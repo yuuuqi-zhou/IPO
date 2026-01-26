@@ -42,9 +42,6 @@ div.stButton > button:first-child:hover {
 
 # =========================
 # (2) Font: Cloud 没有中文字体 -> 必须显式加载字体文件才不会方框
-# 你可以把字体放 repo：
-#   assets/fonts/NotoSansSC-Regular.otf   (推荐)
-# 或 assets/fonts/SourceHanSansSC-Regular.otf
 # =========================
 def setup_cn_font():
     candidates = [
@@ -67,7 +64,7 @@ def setup_cn_font():
 
 font_ok, font_path = setup_cn_font()
 if not font_ok:
-    st.caption("⚠️ 服务器环境可能没有中文字体，图里中文可能显示为方框。建议把中文字体文件放到 repo 的 assets/fonts/ 目录。")
+    st.caption("服务器环境可能没有中文字体，图里中文可能显示为方框。建议把中文字体文件放到 repo 的 assets/fonts/ 目录。")
 
 # =========================
 # History data (真实分布基准)
@@ -124,7 +121,7 @@ def trimmed_xlim(arr, low_q=0.01, high_q=0.99):
     return (lo, hi)
 
 # =========================
-# (1) 更明显的“定位图”：淡柱 + 高亮带 + 粗线 + 点 + 标签
+# (1) 更明显的“定位图”
 # =========================
 def draw_hist_on_axis(ax, hist_vals, marker, title, xlabel, bins=28, xlim=None, fmt_value=None):
     hist_vals = np.asarray(hist_vals, dtype=float)
@@ -155,7 +152,19 @@ def draw_hist_on_axis(ax, hist_vals, marker, title, xlabel, bins=28, xlim=None, 
         ax.axvspan(marker - 0.5 * bw, marker + 0.5 * bw, alpha=0.18)
 
     ax.axvline(marker, linewidth=3)
-    ax.scatter([marker], [ax.get_ylim()[1] * 0.92], s=70, zorder=5)
+    ymax = ax.get_ylim()[1]
+
+    ax.annotate(
+        f"{val_text}\nPercentile: {pct_text}",
+        xy=(marker, ymax*0.85),
+        xytext=(marker, ymax*0.98),
+        textcoords="data",
+        ha="center",
+        va="top",
+        fontsize=11,
+        bbox=dict(boxstyle="round,pad=0.25", alpha=0.20),
+        arrowprops=dict(arrowstyle="-|>", lw=1.5, alpha=0.8),
+    )
 
     if fmt_value is None:
         val_text = f"{marker:.3f}"
