@@ -398,9 +398,6 @@ if pred_result is not None:
                     )
                 st.pyplot(fig3, use_container_width=True)
 
-        except Exception as e:
-            st.error(f"历史分布图生成失败：{e}")
-
     st.divider()
 
     st.subheader("融资杠杆")
