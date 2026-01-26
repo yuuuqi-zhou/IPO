@@ -470,9 +470,6 @@ if pred_result is not None:
                 )
                 st.pyplot(fig2, use_container_width=True)
 
-
-    st.divider()
-
     # =========================
     # 杠杆展示
     # =========================
