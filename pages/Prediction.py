@@ -162,7 +162,7 @@ def draw_hist_on_axis(ax, hist_vals, marker, title, xlabel, bins=28, xlim=None, 
     ax.text(
         0.98,
         0.95,
-        f"{val_text}\nPercentile: {pct_text}",
+        f"{val_text}\n分位: {pct_text}",
         ha="right",
         va="top",
         transform=ax.transAxes,
