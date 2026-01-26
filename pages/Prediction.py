@@ -304,12 +304,12 @@ def draw_breach_heatmap_minimal(ax, res, pred_ret, pred_vol, title="类似首日
     ax.text(
         0.98, 0.98, txt,
         transform=ax.transAxes,
+        linespacing=1.0, 
         ha="right",
         va="top",
         fontsize=10.5,   # 比之前略小但更干净
         bbox=dict(
             boxstyle="round,pad=0.15",
-            linespacing=1.0, 
             facecolor="white",
             alpha=0.9,   # 白底半透明，确保可读
             edgecolor="none"
