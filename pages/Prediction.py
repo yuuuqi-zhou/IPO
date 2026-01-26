@@ -308,7 +308,7 @@ def draw_breach_heatmap_minimal(ax, res, pred_ret, pred_vol, title="类似首日
         va="top",
         fontsize=10.5,   # 比之前略小但更干净
         bbox=dict(
-            boxstyle="round,pad=0.35",
+            boxstyle="round,pad=0.28",
             facecolor="white",
             alpha=0.75,   # 白底半透明，确保可读
             edgecolor="none"
