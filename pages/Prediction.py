@@ -214,9 +214,9 @@ pred_result = st.session_state.get("pred_result", None)
 lev_result = st.session_state.get("lev_result", None)
 
 if pred_result is not None:
-    pr = pred_result["pr"]
-    pv_raw = pred_result["pv_raw"]
-    pms = pred_result["pms"]
+    pr = pred_result.get("pr", np.nan)
+    pv_raw = pred_result.get("pv_raw", pred_result.get("pv", np.nan))
+    pms = pred_result.get("pms", np.nan)
 
     # 顶部三个 metric
     c1, c2, c3 = st.columns(3)
