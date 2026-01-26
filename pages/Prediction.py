@@ -442,7 +442,7 @@ if pred_result is not None:
 
             # 图1：涨跌幅真实分布 + marker
             with colA:
-                fig1, ax1 = plt.subplots(figsize=(5.2, 3.6))
+                fig1, ax1 = plt.subplots(figsize=(6.5, 4.2))   # 稍微大一点，填满半屏
                 draw_hist_with_marker(
                     ax1,
                     data=s_ret.values,
@@ -453,10 +453,10 @@ if pred_result is not None:
                     n_bins=18,
                 )
                 st.pyplot(fig1, use_container_width=True)
-
+            
             # 图2：成交量 log1p 分布 + marker
             with colB:
-                fig2, ax2 = plt.subplots(figsize=(5.2, 3.6))
+                fig2, ax2 = plt.subplots(figsize=(6.5, 4.2))   # 同尺寸，左右视觉一致
                 s_logv = np.log1p(s_vol.values)
                 marker_logv = np.log1p(pv_show) if np.isfinite(pv_show) and pv_show >= 0 else np.nan
                 draw_hist_with_marker(
