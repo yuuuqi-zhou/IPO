@@ -470,6 +470,9 @@ if pred_result is not None:
                 )
                 st.pyplot(fig2, use_container_width=True)
 
+        except Exception as e:
+            st.error(f"历史分布图生成失败：{e}")
+        
     # =========================
     # 杠杆展示
     # =========================
