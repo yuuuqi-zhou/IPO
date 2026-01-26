@@ -293,7 +293,8 @@ def draw_breach_heatmap_minimal(ax, res, pred_ret, pred_vol, title="类似首日
     if np.isfinite(rate_here):
         delta = rate_here - base
         txt = (
-            f"当前对应区间的历史跌破率约为 {rate_here*100:.1f}%\n"
+            f"模型预测跌破概率：{p_ms*100:.1f}%\n"
+            f"当前对应区间的历史跌破率约为 {rate_here*100:.1f}%"
         )
     else:
         txt = (
@@ -302,7 +303,7 @@ def draw_breach_heatmap_minimal(ax, res, pred_ret, pred_vol, title="类似首日
         )
 
     ax.text(
-        0.5, 0.98, txt,
+        0.98, 0.98, txt,
         transform=ax.transAxes,
         ha="right",
         va="top",
