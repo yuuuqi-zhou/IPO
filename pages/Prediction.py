@@ -50,8 +50,8 @@ LABEL_MAP = meta.get("label_map", {})
 # ✅ 历史分布：直接读 repo 根目录的 港股_new.xlsx
 # Prediction.py 在 pages/，所以 ROOT = pages 的上一级
 # ==========
-ROOT = Path(__file__).resolve().parents[1]
-HIST_XLSX = ROOT / "港股_new.xlsx"
+HIST_CSV = ROOT / "pred_output.csv"
+hist_df = load_hist_df(HIST_CSV)
 
 # 你历史数据里的列名（按你截图）
 COL_RETURN = "相对发行价涨跌幅"
