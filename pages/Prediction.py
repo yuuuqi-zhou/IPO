@@ -39,7 +39,7 @@ div.stButton > button:first-child:hover {
 # ✅ 历史分布基准（直接读 repo 根目录的 pred_output.csv）
 # 当前文件在 pages/ 下，所以用 ..
 # ==========
-HIST_CSV = "../pred_output.csv"
+HIST_CSV = "pred_output.csv"
 
 @st.cache_data(show_spinner=False)
 def load_hist_df(csv_path: str):
