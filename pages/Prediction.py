@@ -490,7 +490,7 @@ if pred_result is not None:
                     xlabel="相对发行价涨跌幅（%）",
                     fmt_value=f"{pr:.2f}%",
                     n_bins=18,
-                    xlim=(-100, 200), 
+                    xlim=(-100, 230), 
                 )
                 st.pyplot(fig1, use_container_width=True)
             
@@ -507,6 +507,7 @@ if pred_result is not None:
                     xlabel="log(1 + 成交量)",
                     fmt_value=f"{pv_show:,.0f}",
                     n_bins=18,
+                    xlim=(-50, 30),
                 )
                 st.pyplot(fig2, use_container_width=True)
 
