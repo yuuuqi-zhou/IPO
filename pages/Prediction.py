@@ -437,8 +437,8 @@ if pred_result is not None:
             s_vol = _clean_num_series(hist_df, COL_VOL)
             s_ms  = _clean_num_series(hist_df, COL_MS)
 
-            # 画布：3列
-            colA, colB, colC = st.columns(3)
+            # 画布：2列
+            colA, colB = st.columns(2, gap="large")
 
             # 图1：涨跌幅真实分布 + marker
             with colA:
@@ -470,25 +470,6 @@ if pred_result is not None:
                 )
                 st.pyplot(fig2, use_container_width=True)
 
-            # 图3：极简 5x5 历史条件跌破率
-            with colC:
-                fig3, ax3 = plt.subplots(figsize=(6.2, 4.6))
-                res = compute_breach_grid(hist_df, COL_RETURN, COL_VOL, COL_MS, n_ret=5, n_vol=5)
-                if res is None:
-                    ax3.axis("off")
-                    ax3.text(0.5, 0.5, "历史数据不足，无法计算跌破率分布", ha="center", va="center")
-                else:
-                    draw_breach_heatmap_minimal(
-                        ax3,
-                        res=res,
-                        pred_ret=pr,
-                        pred_vol=pv_show,
-                        title="类似首日表现下的历史跌破风险（真实样本）",
-                    )
-                st.pyplot(fig3, use_container_width=True)
-
-        except Exception as e:
-            st.error(f"历史分布图生成失败：{e}")
 
     st.divider()
 
