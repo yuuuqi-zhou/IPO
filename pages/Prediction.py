@@ -294,7 +294,6 @@ def draw_breach_heatmap_minimal(ax, res, pred_ret, pred_vol, title="类似首日
         delta = rate_here - base
         txt = (
             f"当前对应区间的历史跌破率约为 {rate_here*100:.1f}%\n"
-            f"相较全样本平均水平（{base*100:.1f}%）{delta*100:+.1f}个百分点"
         )
     else:
         txt = (
