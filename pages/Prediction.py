@@ -265,7 +265,7 @@ def draw_breach_heatmap_minimal(ax, res, pred_ret, pred_vol, title="类似首日
         aspect="auto",
         cmap="Blues",  
         vmin=0,
-        vmax=0.5
+        vmax=0.8
     )
     ax.set_title(title, fontsize=13, fontweight="bold")
     ax.set_xlabel("首日涨跌幅（分位区间）")
