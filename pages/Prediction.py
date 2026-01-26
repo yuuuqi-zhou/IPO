@@ -66,6 +66,23 @@ def setup_cn_font():
 ok_font, _fp = setup_cn_font()
 
 # =========================
+# 计算展示区间
+# =========================
+def get_xlim_by_percentile(data: np.ndarray, lo=1, hi=99, pad_ratio=0.03):
+    data = np.asarray(data, dtype=float)
+    data = data[np.isfinite(data)]
+    if data.size == 0:
+        return None
+
+    left, right = np.percentile(data, [lo, hi])
+    if not np.isfinite(left) or not np.isfinite(right) or left == right:
+        return None
+
+    pad = (right - left) * pad_ratio
+    return (left - pad, right + pad)
+
+
+# =========================
 # Load artifacts / policy
 # =========================
 meta, models = load_artifacts()
@@ -121,43 +138,64 @@ def _clean_num_series(df: pd.DataFrame, col: str):
 # =========================
 # Plot helpers
 # =========================
-def draw_hist_with_marker(ax, data, marker, title, xlabel, fmt_value, n_bins=18):
-    """
-    极简报告风格：
-    - 灰/浅色直方图（默认颜色）
-    - marker 位置：透明高亮带 + 粗竖线
-    - 箭头注释：value + percentile
-    """
+def draw_hist_with_marker(
+    ax, data, marker, title, xlabel, fmt_value,
+    n_bins=18,
+    xlim=None,                 # ✅ 新增：手动指定展示区间
+    clip_pct=(1, 99),          # ✅ 新增：不指定 xlim 时用分位截断
+):
     data = np.asarray(data, dtype=float)
     data = data[np.isfinite(data)]
 
-    ax.hist(data, bins=n_bins, alpha=0.35, edgecolor="white")
     ax.set_title(title, fontsize=13, fontweight="bold")
     ax.set_xlabel(xlabel)
     ax.set_ylabel("个数")
 
-    if not np.isfinite(marker) or data.size == 0:
+    if data.size == 0:
         return np.nan
 
-    pct = pct_rank(marker, data) * 100.0
+    # 1) 计算展示范围（优先用 xlim；否则用分位截断）
+    if xlim is None:
+        xlim = get_xlim_by_percentile(data, lo=clip_pct[0], hi=clip_pct[1], pad_ratio=0.03)
 
-    # 高亮带：用 bin 宽近似
-    try:
-        q25, q75 = np.percentile(data, [25, 75])
-        span = max((q75 - q25) * 0.02, (np.max(data) - np.min(data)) * 0.01)
-        span = max(span, 1e-6)
-    except Exception:
-        span = 1.0
+    # 2) 画直方图：关键是 range=xlim（否则极端值仍影响 bin）
+    if xlim is not None:
+        ax.hist(data, bins=n_bins, range=xlim, alpha=0.35, edgecolor="white")
+        ax.set_xlim(xlim)
+    else:
+        ax.hist(data, bins=n_bins, alpha=0.35, edgecolor="white")
 
-    ax.axvspan(marker - span, marker + span, alpha=0.15)
-    ax.axvline(marker, linewidth=3)
+    # 3) 分位（用全量数据算，不受截断影响）
+    pct = pct_rank(marker, data) * 100.0 if np.isfinite(marker) else np.nan
+
+    if not np.isfinite(marker):
+        return np.nan
+
+    # 4) marker 如果超出展示范围：把线画在边界，并提示
+    marker_for_plot = marker
+    suffix = ""
+    if xlim is not None:
+        left, right = xlim
+        if marker < left:
+            marker_for_plot = left
+            suffix = "（低于展示范围）"
+        elif marker > right:
+            marker_for_plot = right
+            suffix = "（高于展示范围）"
+
+    # 高亮带：用 IQR 估一个 span（在截断后的图上也好看）
+    q25, q75 = np.percentile(data, [25, 75])
+    span = max((q75 - q25) * 0.02, 1e-6)
+
+    ax.axvspan(marker_for_plot - span, marker_for_plot + span, alpha=0.15)
+    ax.axvline(marker_for_plot, linewidth=3)
 
     ymax = ax.get_ylim()[1] if ax.get_ylim()[1] > 0 else 1.0
 
     ax.annotate(
-        f"{fmt_value}\n分位: {pct:.1f}%",
-        xy=(marker, ymax * 0.80),
-        xytext=(marker, ymax * 0.98),
+        f"{fmt_value}{suffix}\n分位: {pct:.1f}%",
+        xy=(marker_for_plot, ymax * 0.80),
+        xytext=(marker_for_plot, ymax * 0.98),
         ha="center",
         va="top",
         fontsize=11,
@@ -166,6 +204,7 @@ def draw_hist_with_marker(ax, data, marker, title, xlabel, fmt_value, n_bins=18)
     )
 
     return pct
+
 
 def compute_breach_grid(hist_df: pd.DataFrame, col_ret: str, col_vol: str, col_ms: str, n_ret=5, n_vol=5):
     """
@@ -451,6 +490,7 @@ if pred_result is not None:
                     xlabel="相对发行价涨跌幅（%）",
                     fmt_value=f"{pr:.2f}%",
                     n_bins=18,
+                    xlim=(-100, 200), 
                 )
                 st.pyplot(fig1, use_container_width=True)
             
