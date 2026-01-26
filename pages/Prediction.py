@@ -134,7 +134,7 @@ def draw_hist_with_marker(ax, data, marker, title, xlabel, fmt_value, n_bins=18)
     ax.hist(data, bins=n_bins, alpha=0.35, edgecolor="white")
     ax.set_title(title, fontsize=13, fontweight="bold")
     ax.set_xlabel(xlabel)
-    ax.set_ylabel("Count")
+    ax.set_ylabel("个数")
 
     if not np.isfinite(marker) or data.size == 0:
         return np.nan
@@ -155,7 +155,7 @@ def draw_hist_with_marker(ax, data, marker, title, xlabel, fmt_value, n_bins=18)
     ymax = ax.get_ylim()[1] if ax.get_ylim()[1] > 0 else 1.0
 
     ax.annotate(
-        f"{fmt_value}\nPercentile: {pct:.1f}%",
+        f"{fmt_value}\n分位: {pct:.1f}%",
         xy=(marker, ymax * 0.80),
         xytext=(marker, ymax * 0.98),
         ha="center",
@@ -259,7 +259,14 @@ def draw_breach_heatmap_minimal(ax, res, pred_ret, pred_vol, title="类似首日
     rb = locate_bin(pred_ret, ret_edges)
     vb = locate_bin(pred_logv, vol_edges)
 
-    im = ax.imshow(grid, origin="lower", aspect="auto", vmin=0, vmax=1)
+    im = ax.imshow(
+        grid,
+        origin="lower",
+        aspect="auto",
+        cmap="Blues",  
+        vmin=0,
+        vmax=0.6
+    )
     ax.set_title(title, fontsize=13, fontweight="bold")
     ax.set_xlabel("首日涨跌幅（分位区间）")
     ax.set_ylabel("log(1+成交量)（分位区间）")
@@ -278,20 +285,22 @@ def draw_breach_heatmap_minimal(ax, res, pred_ret, pred_vol, title="类似首日
         ax.add_patch(rect)
 
     # colorbar（简洁）
-    cbar = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_label("历史跌破率")
+    cbar = plt.colorbar(im, ax=ax, fraction=0.045, pad=0.04)
+    cbar.set_label("历史跌破概率", fontsize=10)
+    cbar.ax.tick_params(labelsize=9)
 
     # 右上角解释
     if np.isfinite(rate_here):
         delta = rate_here - base
         txt = (
-            "怎么看：颜色=真实历史中该区间的跌破比例\n"
-            f"当前区间≈{rate_here*100:.1f}%  |  全样本≈{base*100:.1f}%（{delta*100:+.1f}pct）"
+            "该图展示了在不同首日表现区间内的历史跌破风险分布\n"
+            f"当前预测对应区间的历史跌破率约为 {rate_here*100:.1f}%，"
+            f"相较全样本平均水平（{base*100:.1f}%）{delta*100:+.1f}pct"
         )
     else:
         txt = (
-            "怎么看：颜色=真实历史中该区间的跌破比例\n"
-            f"全样本平均≈{base*100:.1f}%（当前落点无法定位）"
+            "该图展示了在不同首日表现区间内的历史跌破风险分布\n"
+            f"全样本平均跌破率约为 {base*100:.1f}%"
         )
 
     ax.text(
@@ -450,7 +459,7 @@ if pred_result is not None:
                     ax2,
                     data=s_logv,
                     marker=marker_logv,
-                    title="成交量（log1p 历史分布）",
+                    title="成交量（真实历史分布）",
                     xlabel="log(1 + 成交量)",
                     fmt_value=f"{pv_show:,.0f}",
                     n_bins=18,
