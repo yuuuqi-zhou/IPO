@@ -472,7 +472,7 @@ if pred_result is not None:
 
             # 图3：极简 5x5 历史条件跌破率
             with colC:
-                fig3, ax3 = plt.subplots(figsize=(5.5, 3.9))
+                fig3, ax3 = plt.subplots(figsize=(6.0, 4.4))
                 res = compute_breach_grid(hist_df, COL_RETURN, COL_VOL, COL_MS, n_ret=5, n_vol=5)
                 if res is None:
                     ax3.axis("off")
