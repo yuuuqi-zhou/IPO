@@ -10,6 +10,9 @@ from utils import (
     compute_dynamic_funding_ratio,
 )
 
+plt.rcParams["font.sans-serif"] = ["PingFang SC", "Arial Unicode MS", "Heiti SC", "SimHei"]
+plt.rcParams["axes.unicode_minus"] = False
+
 st.set_page_config(page_title="Prediction", layout="wide")
 st.title("首日表现预测及融资杠杆方案")
 
