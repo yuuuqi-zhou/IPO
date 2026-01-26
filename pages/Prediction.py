@@ -490,7 +490,7 @@ if pred_result is not None:
                     xlabel="相对发行价涨跌幅（%）",
                     fmt_value=f"{pr:.2f}%",
                     n_bins=18,
-                    xlim=(-100, 230), 
+                    xlim=(-70, 200), 
                 )
                 st.pyplot(fig1, use_container_width=True)
             
