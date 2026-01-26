@@ -43,12 +43,12 @@ div.stButton > button:first-child:hover {
 # =========================
 # (2) Font: Cloud 没有中文字体 -> 必须显式加载字体文件才不会方框
 # 你可以把字体放 repo：
-#   assets/fonts/NotoSansCJKsc-Regular.otf   (推荐)
+#   assets/fonts/NotoSansSC-Regular.otf   (推荐)
 # 或 assets/fonts/SourceHanSansSC-Regular.otf
 # =========================
 def setup_cn_font():
     candidates = [
-        "assets/fonts/NotoSansCJKsc-Regular.otf",
+        "assets/fonts/NotoSansSC-Regular.otf",
         "assets/fonts/SourceHanSansSC-Regular.otf",
         "assets/fonts/NotoSansCJK-Regular.ttc",
         "assets/fonts/SimHei.ttf",
