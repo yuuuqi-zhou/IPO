@@ -381,20 +381,25 @@ if pred_result is not None:
                 )
                 st.pyplot(fig, clear_figure=True)
 
-            # 第三张：跌破率地图（不需要历史概率）
+            # 第三张：跌破率地图
             with colC:
-                fig, ax = plt.subplots(figsize=(4.2, 3.2))
-                res = compute_breach_grid(hist_df, COL_RETURN, COL_VOL, COL_MS, n_ret=10, n_vol=10)
+                fig3, ax3 = plt.subplots(figsize=(5.2, 3.6))
+                res = compute_breach_grid(hist_df, COL_RETURN, COL_VOL, COL_MS, n_ret=5, n_vol=5)
                 if res is None:
-                    ax.text(0.5, 0.5, "数据分位边界不足\n（可能样本太少或值重复）", ha="center", va="center", transform=ax.transAxes)
-                    ax.set_axis_off()
-                    st.pyplot(fig, clear_figure=True)
+                    ax3.axis("off")
+                    ax3.text(0.5, 0.5, "历史数据不足，无法计算跌破率分布", ha="center", va="center")
                 else:
-                    grid, cnt, ret_edges, vol_edges = res
-                    im = draw_breach_heatmap(ax, grid, cnt, ret_edges, vol_edges, pr, pv_raw)
-                    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-                    cbar.set_label("Breach Rate", rotation=90)
-                    st.pyplot(fig, clear_figure=True)
+                    draw_breach_heatmap_minimal(
+                        ax3,
+                        res=res,
+                        pred_ret=pr,
+                        pred_vol=pv_show,
+                        title="类似首日表现下的历史跌破风险（真实样本）",
+                    )
+                st.pyplot(fig3, use_container_width=True)
+
+        except Exception as e:
+            st.error(f"历史分布图生成失败：{e}")
 
     st.divider()
 
