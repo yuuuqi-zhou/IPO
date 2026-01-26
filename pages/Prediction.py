@@ -1,8 +1,7 @@
 import numpy as np
-import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from pathlib import Path
+import streamlit as st
 
 from utils import (
     load_artifacts,
@@ -37,27 +36,12 @@ div.stButton > button:first-child:hover {
 )
 
 # ==========
-# load artifacts / policy
-# ==========
-meta, models = load_artifacts()
-policy = load_leverage_policy()
-
-feature_cols = meta.get("feature_cols", [])
-industry_map = meta.get("industry_score_map", {})
-LABEL_MAP = meta.get("label_map", {})
-
-# ==========
-# ✅ 历史分布：直接读 repo 根目录的 港股_new.xlsx
-# Prediction.py 在 pages/，所以 ROOT = pages 的上一级
+# ✅ 历史分布基准（直接读 repo 根目录的 pred_output.csv）
+# 当前文件在 pages/ 下，所以用 ..
 # ==========
 HIST_CSV = "../pred_output.csv"
+
 @st.cache_data(show_spinner=False)
-
-# 你历史数据里的列名（按你截图）
-COL_RETURN = "相对发行价涨跌幅"
-COL_VOL = "成交量"
-COL_MS = "marginstress10"
-
 def load_hist_df(csv_path: str):
     try:
         return pd.read_csv(csv_path)
@@ -65,6 +49,44 @@ def load_hist_df(csv_path: str):
         return None
 
 hist_df = load_hist_df(HIST_CSV)
+
+def pick_hist_cols(df: pd.DataFrame):
+    """
+    优先用真实列做“整体分布”（更符合 mentor 的“整体分布”）
+    如果真实列不存在，就用 pred_* 列（一定存在，也合理）
+    """
+    if df is None:
+        return None
+
+    # 真实列（如果 pred_output.csv 是在原数据上追加 pred_*，通常这些会存在）
+    real_ret = "相对发行价涨跌幅"
+    real_vol = "成交量"
+    real_ms  = "marginstress10"
+
+    if (real_ret in df.columns) and (real_vol in df.columns) and (real_ms in df.columns):
+        return {
+            "mode": "real",
+            "ret": real_ret,
+            "vol": real_vol,
+            "ms":  real_ms,
+        }
+
+    # 预测列兜底
+    pred_ret = "pred_return"
+    pred_vol = "pred_vol"
+    pred_ms  = "pred_ms_proba"
+
+    if (pred_ret in df.columns) and (pred_vol in df.columns) and (pred_ms in df.columns):
+        return {
+            "mode": "pred",
+            "ret": pred_ret,
+            "vol": pred_vol,
+            "ms":  pred_ms,
+        }
+
+    return None
+
+HIST_COLS = pick_hist_cols(hist_df)
 
 def plot_dist_with_marker(hist_vals, marker, title, xlabel, bins=35):
     hist_vals = np.asarray(hist_vals, dtype=float)
@@ -82,7 +104,15 @@ def plot_dist_with_marker(hist_vals, marker, title, xlabel, bins=35):
     ax.set_ylabel("Count")
     st.pyplot(fig, clear_figure=True)
 
-hist_df = load_hist_df(HIST_CSV)
+# ==========
+# load artifacts / policy
+# ==========
+meta, models = load_artifacts()
+policy = load_leverage_policy()
+
+feature_cols = meta.get("feature_cols", [])
+industry_map = meta.get("industry_score_map", {})
+LABEL_MAP = meta.get("label_map", {})
 
 # ==========
 # utils: parse float (empty/invalid -> NaN)
@@ -162,9 +192,9 @@ if run:
     try:
         pred = predict_all(x, meta, models)
 
-        pr = safe_float(pred.get("pred_return", np.nan))
-        pv = safe_float(pred.get("pred_vol", np.nan))
-        pms = safe_float(pred.get("p_ms", np.nan))
+        pr = safe_float(pred.get("pred_return", np.nan))  # 单位：%
+        pv = safe_float(pred.get("pred_vol", np.nan))     # 可能是 log1p 空间
+        pms = safe_float(pred.get("p_ms", np.nan))        # 0-1
 
         # 杠杆建议
         lev = compute_dynamic_funding_ratio(
@@ -197,58 +227,74 @@ if pred_result is not None:
     c1, c2, c3 = st.columns(3)
     c1.metric("涨跌幅（预测）", f"{pr:.2f}%")
 
+    # 成交量显示：若 pv_raw 是 log1p 空间 -> expm1 还原显示
     pv_show = float(np.expm1(pv_raw)) if np.isfinite(pv_raw) else pv_raw
     c2.metric("成交量（预测）", f"{pv_show:,.0f}")
     c3.metric("跌破概率（预测）", f"{pms * 100:.2f}%")
 
     # ==========
-    # ✅ 直接在输出预测结果后面加：整体分布定位图（不加上传模块）
+    # ✅ mentor 要的：整体分布定位图（直接放在预测结果下面）
     # ==========
     st.subheader("预测结果在整体分布中的位置")
 
     if hist_df is None:
-        st.info(f"未找到历史基准文件：{HIST_XLSX}（确认它在仓库根目录且已 push）")
+        st.info("未能读取历史基准文件：../pred_output.csv（确认它在仓库根目录并已 push）")
+    elif HIST_COLS is None:
+        st.info("历史基准数据缺少必要列：需要真实列(相对发行价涨跌幅/成交量/marginstress10) 或 预测列(pred_return/pred_vol/pred_ms_proba)。")
     else:
-        # 1) 涨跌幅分布（用真实历史列）
-        if COL_RETURN in hist_df.columns and np.isfinite(pr):
+        mode = HIST_COLS["mode"]
+        col_ret = HIST_COLS["ret"]
+        col_vol = HIST_COLS["vol"]
+        col_ms  = HIST_COLS["ms"]
+
+        # 1) Return 分布
+        if col_ret in hist_df.columns and np.isfinite(pr):
             plot_dist_with_marker(
-                hist_df[COL_RETURN].dropna().values,
+                hist_df[col_ret].dropna().values,
                 pr,
-                "首日涨跌幅：历史分布定位",
-                "首日涨跌幅(%)",
+                f"首日涨跌幅：整体分布定位（基准：{('真实值' if mode=='real' else '历史预测值')}）",
+                col_ret,
                 bins=35,
             )
-        else:
-            st.caption(f"涨跌幅分布图未绘制：历史数据缺列「{COL_RETURN}」或预测值无效。")
 
-        # 2) 成交量分布：用 log1p 对齐 pv_raw（避免竖线位置错）
-        if COL_VOL in hist_df.columns and np.isfinite(pv_raw):
-            hv = hist_df[COL_VOL].dropna().values.astype(float)
-            hv_log = np.log1p(hv)
-            plot_dist_with_marker(
-                hv_log,
-                pv_raw,
-                "成交量：历史分布定位（log1p，对齐模型输出）",
-                "log(1 + 成交量)",
-                bins=35,
-            )
-        else:
-            st.caption(f"成交量分布图未绘制：历史数据缺列「{COL_VOL}」或预测值无效。")
+        # 2) Volume 分布
+        # - 如果基准是“真实成交量”，用 log1p 再对齐 pv_raw（因为你的 pv_raw 很可能在 log1p 空间）
+        # - 如果基准是 pred_vol，就直接用 pred_vol 分布（同一空间）
+        if col_vol in hist_df.columns and np.isfinite(pv_raw):
+            if mode == "real":
+                hv = hist_df[col_vol].dropna().values.astype(float)
+                hv_log = np.log1p(hv)
+                plot_dist_with_marker(
+                    hv_log,
+                    pv_raw,
+                    "成交量：整体分布定位（log1p，对齐模型输出）",
+                    "log(1 + 成交量)",
+                    bins=35,
+                )
+            else:
+                plot_dist_with_marker(
+                    hist_df[col_vol].dropna().values.astype(float),
+                    pv_raw,
+                    "成交量：整体分布定位（基准：历史预测值 pred_vol）",
+                    col_vol,
+                    bins=35,
+                )
 
-        # 3) 风险指标/概率分布：marginstress10
-        if COL_MS in hist_df.columns and np.isfinite(pms):
+        # 3) Risk 分布（概率/指标）
+        if col_ms in hist_df.columns and np.isfinite(pms):
             plot_dist_with_marker(
-                hist_df[COL_MS].dropna().values.astype(float),
+                hist_df[col_ms].dropna().values.astype(float),
                 pms,
-                "下行风险：历史分布定位",
-                COL_MS,
+                f"下行风险：整体分布定位（基准：{('真实值' if mode=='real' else '历史预测值')}）",
+                col_ms,
                 bins=35,
             )
-        else:
-            st.caption(f"风险分布图未绘制：历史数据缺列「{COL_MS}」或预测值无效。")
 
     st.divider()
 
+    # ==========
+    # 融资杠杆
+    # ==========
     st.subheader("融资杠杆")
 
     if not lev_result:
