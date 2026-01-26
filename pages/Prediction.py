@@ -393,10 +393,12 @@ pred_result = st.session_state.get("pred_result", None)
 lev_result = st.session_state.get("lev_result", None)
 
 if pred_result is not None:
-    pr = pred_result["pr"]
-    pv_raw = pred_result["pv_raw"]
-    pv_show = pred_result["pv_show"]
-    pms = pred_result["pms"]
+    pr = pred_result.get("pr", np.nan)
+    pv_raw = pred_result.get("pv_raw", pred_result.get("pv", np.nan))
+    pv_show = pred_result.get("pv_show", np.nan)
+    if not np.isfinite(pv_show):
+        pv_show = float(np.expm1(pv_raw)) if np.isfinite(pv_raw) else np.nan
+    pms = pred_result.get("pms", np.nan)
 
     c1, c2, c3 = st.columns(3)
     c1.metric("涨跌幅（预测）", f"{pr:.2f}%")
