@@ -50,7 +50,7 @@ LABEL_MAP = meta.get("label_map", {})
 # ✅ 历史分布：直接读 repo 根目录的 港股_new.xlsx
 # Prediction.py 在 pages/，所以 ROOT = pages 的上一级
 # ==========
-HIST_CSV = ROOT / "pred_output.csv"
+HIST_PATH = "../pred_output.csv"
 hist_df = load_hist_df(HIST_CSV)
 
 # 你历史数据里的列名（按你截图）
@@ -59,9 +59,19 @@ COL_VOL = "成交量"
 COL_MS = "marginstress10"
 
 @st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def load_hist_df(path: Path):
-    if path.exists():
-        return pd.read_excel(path)
+    if not path.exists():
+        return None
+    suffix = path.suffix.lower()
+    if suffix in [".csv"]:
+        return pd.read_csv(path)
+    if suffix in [".xlsx", ".xls"]:
+        # 云端没装 openpyxl 会失败，所以这里不强依赖
+        try:
+            return pd.read_excel(path)
+        except Exception:
+            return None
     return None
 
 def plot_dist_with_marker(hist_vals, marker, title, xlabel, bins=35):
