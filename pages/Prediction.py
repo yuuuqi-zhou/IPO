@@ -448,7 +448,7 @@ if pred_result is not None:
                     data=s_ret.values,
                     marker=pr,
                     title="涨跌幅（真实历史分布）",
-                    xlabel="相对发行价涨跌幅",
+                    xlabel="相对发行价涨跌幅（%）",
                     fmt_value=f"{pr:.2f}%",
                     n_bins=18,
                 )
