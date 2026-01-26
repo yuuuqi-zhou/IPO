@@ -137,7 +137,7 @@ def draw_hist_on_axis(ax, hist_vals, marker, title, xlabel, bins=28, xlim=None, 
 
     ax.set_title(title, fontsize=12, fontweight="bold")
     ax.set_xlabel(xlabel)
-    ax.set_ylabel("Count")
+    ax.set_ylabel("个数")
 
     if marker is None or (not np.isfinite(marker)) or hist_vals.size == 0:
         return
