@@ -507,7 +507,6 @@ if pred_result is not None:
                     xlabel="log(1 + 成交量)",
                     fmt_value=f"{pv_show:,.0f}",
                     n_bins=18,
-                    xlim=(0, 25),
                 )
                 st.pyplot(fig2, use_container_width=True)
 
