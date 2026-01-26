@@ -82,7 +82,7 @@ def plot_dist_with_marker(hist_vals, marker, title, xlabel, bins=35):
     ax.set_ylabel("Count")
     st.pyplot(fig, clear_figure=True)
 
-hist_df = load_hist_df(HIST_XLSX)
+hist_df = load_hist_df(HIST_CSV)
 
 # ==========
 # utils: parse float (empty/invalid -> NaN)
