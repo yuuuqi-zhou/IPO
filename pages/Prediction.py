@@ -377,7 +377,7 @@ if pred_result is not None:
                     ax,
                     hist_vol_log,
                     pv_raw,
-                    "成交量（log1p 历史分布）",
+                    "成交量（真实历史分布）",
                     "log(1 + 成交量)",
                     bins=28,
                     xlim=xlim_vol,
