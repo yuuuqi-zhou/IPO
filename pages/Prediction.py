@@ -152,19 +152,6 @@ def draw_hist_on_axis(ax, hist_vals, marker, title, xlabel, bins=28, xlim=None, 
         ax.axvspan(marker - 0.5 * bw, marker + 0.5 * bw, alpha=0.18)
 
     ax.axvline(marker, linewidth=3)
-    ymax = ax.get_ylim()[1]
-
-    ax.annotate(
-        f"{val_text}\nPercentile: {pct_text}",
-        xy=(marker, ymax*0.85),
-        xytext=(marker, ymax*0.98),
-        textcoords="data",
-        ha="center",
-        va="top",
-        fontsize=11,
-        bbox=dict(boxstyle="round,pad=0.25", alpha=0.20),
-        arrowprops=dict(arrowstyle="-|>", lw=1.5, alpha=0.8),
-    )
 
     if fmt_value is None:
         val_text = f"{marker:.3f}"
